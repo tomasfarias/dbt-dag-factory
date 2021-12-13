@@ -1,4 +1,6 @@
 """A factory that generates Airflow DAGs from a dbt manifest."""
+from __future__ import annotations
+
 import json
 import typing
 from os import PathLike

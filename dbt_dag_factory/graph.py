@@ -1,4 +1,6 @@
 """Module contains the ManifestGraph class."""
+from __future__ import annotations
+
 import typing
 
 
