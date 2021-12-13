@@ -1,0 +1,5 @@
+"""The module's version information."""
+__author__ = "Tomás Farías Santana"
+__copyright__ = "Copyright 2021 Tomás Farías Santana"
+__title__ = "dbt-dag-factory"
+__version__ = "0.1.0"

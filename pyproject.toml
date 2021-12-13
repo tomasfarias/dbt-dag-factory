@@ -1,0 +1,64 @@
+[tool.poetry]
+name = "dbt-dag-factory"
+version = "0.1.0"
+description = "Produce Airflow DAGs from a dbt manifest file"
+authors = ["Tomás Farías Santana <tomas@tomasfarias.dev>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/tomasfarias/airflow-dbt-python"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+
+    "License :: OSI Approved :: MIT License",
+
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+airflow_dbt_python = "^0.10.2"
+apache-airflow = "^2.0"
+
+[tool.poetry.dev-dependencies]
+black = "^21.10b0"
+flake8 = "^4.0"
+flake8-docstrings = "^1.6"
+isort = "^5.10"
+mypy = "^0.910"
+pre-commit = "^2.15"
+pytest = "^6.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.black]
+line-length = 88
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+ignore_missing_imports = true
+strict_optional = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
