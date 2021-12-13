@@ -1,6 +1,4 @@
 """Test the DbtDagFactory class."""
-import datetime as dt
-
 import pytest
 
 from dbt_dag_factory import DbtDagFactory
