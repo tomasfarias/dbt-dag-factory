@@ -4,16 +4,18 @@ import pytest
 from dbt_dag_factory import DbtDagFactory
 
 CONFIG = """
-dag_id: test_dag
-default_args:
-  owner: example_owner
-  start_date: 2021-01-01 00:00:00
-  retries: 1
-  retry_delay_sec: 300
-schedule_interval: '* * * * *'
-concurrency: 1
-max_active_runs: 1
-description: 'Sample dbt DAG'
+test_dag:
+  dag_arguments:
+    schedule_interval: '* * * * *'
+    max_active_tasks: 1
+    max_active_runs: 1
+    description: 'Sample dbt DAG'
+    start_date: 2021-01-01 00:00:00
+
+    default_args:
+      owner: example_owner
+      retries: 1
+      retry_delay_sec: 300
 """
 
 
@@ -34,8 +36,11 @@ def factory(config_file):
 
 def test_factory_dag_building(factory):
     """Test building a DAG with a test config."""
-    dag = factory.build_dag()
-    assert dag.dag_id == "test_dag"
+    dags = factory.build_dags()
+    assert "test_dag" in dags
+    assert "test_dag" == dags["test_dag"].dag_id
+
+    dag = dags["test_dag"]
 
     tasks = dag.tasks
     seen = set()
