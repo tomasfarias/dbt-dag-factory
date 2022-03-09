@@ -1,6 +1,7 @@
 """A factory that generates Airflow DAGs from a dbt manifest."""
 from __future__ import annotations
 
+import datetime as dt
 import json
 import typing
 from enum import Enum
@@ -51,11 +52,13 @@ class DbtDagFactory:
     def __init__(
         self,
         manifest_path: typing.Union[str, PathLike[str]],
-        config_path: typing.Union[str, PathLike[str]],
+        config_path: typing.Optional[typing.Union[str, PathLike[str]]] = None,
     ):
         """Initialize a DbtDagFactory from a dbt manifest and a configuration."""
         self.manifest_path = Path(manifest_path)
-        self.config_path = Path(config_path)
+        self.config_path: typing.Optional[Path] = (
+            Path(config_path) if config_path is not None else None
+        )
         self._manifest: typing.Optional[dict[str, typing.Any]] = None
         self._config: typing.Optional[dict[str, typing.Any]] = None
         self._graph: typing.Optional[ManifestGraph] = None
@@ -77,6 +80,9 @@ class DbtDagFactory:
 
     def load_config(self) -> dict[str, typing.Any]:
         """Load a configuration from a JSON or YAML file."""
+        if self.config_path is None:
+            return {}
+
         with open(self.config_path, "r") as f:
             content = f.read()
 
@@ -170,11 +176,20 @@ class DbtDagFactory:
         )
         return operator
 
-    def get_dag_arguments(self, dag_id: str):
+    def get_dag_arguments(self, dag_id: str) -> dict[str, typing.Any]:
         """Return the arguments for a given DAG ID."""
-        return self.config[dag_id]["dag_arguments"]
+        try:
+            args = self.config[dag_id]["dag_arguments"]
+        except KeyError:
+            args = {
+                "default_args": {
+                    "start_date": dt.datetime.now().strftime("%Y-%m-%d 00:00:00")
+                }
+            }
 
-    def get_node_dag_id(self, node_id: str):
+        return args
+
+    def get_node_dag_id(self, node_id: str) -> str:
         """Return the DAG ID of a given node ID."""
         node = self.get_node(node_id)
 
@@ -191,14 +206,14 @@ class DbtDagFactory:
             else:
                 return dag_id
 
-        return node["project_name"]
+        return node["package_name"]
 
     def get_node_task_id_select(self, node_id: str, dag: DAG):
         """Return the Task ID and the select argument of a given node ID."""
         node = self.get_node(node_id)
 
         if dag.dag_id not in self.config:
-            return node_id, None
+            return node_id, [node["path"]]
 
         resource_type = node["resource_type"]
         dag_config = self.config[dag.dag_id]
