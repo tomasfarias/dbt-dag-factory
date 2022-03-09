@@ -2,6 +2,8 @@ name: Tests
 on:
   push:
     branches: [ master ]
+    tags:
+      - "v*"
   pull_request:
     branches:
     - master
@@ -15,19 +17,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: abatilo/actions-poetry@v2.1.4
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2.1.4
         with:
           poetry-version: 1.1.12
-      - name: install
+      - name: Install dbt-dag-factory with Poetry
         run: poetry install
-      - name: flake8
+      - name: Style guide enforcement with flake8
         run: poetry run flake8 .
-      - name: mypy
+      - name: Static type checking with mypy
         run: poetry run mypy .
-      - name: black
+      - name: Code formatting with black
         run: poetry run black --check .
-      - name: test
-        run: poetry run pytest -v tests/
+      - name: Run tests with pytest
+        run: poetry run pytest -v --cov=./dbt-dag-factory --cov-report=xml:./coverage.xml --cov-report term-missing tests/
+      - name: Upload code coverage
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          name: redtape
+          flags: unittests
+          env_vars: OS,PYTHON
